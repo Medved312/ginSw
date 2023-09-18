@@ -1,0 +1,287 @@
+definitions:
+  model.Genre:
+    properties:
+      id:
+        type: integer
+      name_genre:
+        type: string
+    type: object
+  model.Movie:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name_movie:
+        type: string
+    type: object
+  model.Movie_genre:
+    properties:
+      id:
+        type: integer
+      id_genre:
+        type: string
+      id_movie:
+        type: string
+    type: object
+host: localhost:5050
+info:
+  contact: {}
+  description: This is a sample server celler server.
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /genre/add/:
+    post:
+      consumes:
+      - application/json
+      description: Сreating a movie record
+      parameters:
+      - description: Сreating a genre
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Genre'
+      produces:
+      - application/json
+      responses: {}
+      summary: CreateGenre
+      tags:
+      - Create
+  /genre/delete/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Deleting data from a table
+      parameters:
+      - description: id genre
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: DeleteGenres
+      tags:
+      - Delete
+  /genre/update/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Updating values in the table genre
+      parameters:
+      - description: id genre
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New values
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Genre'
+      produces:
+      - application/json
+      responses: {}
+      summary: UpdateGenres
+      tags:
+      - Update
+  /get:
+    get:
+      consumes:
+      - application/json
+      description: Привествие
+      produces:
+      - application/json
+      responses: {}
+      summary: Hello
+      tags:
+      - Hello
+  /get/Movie/{limit}:
+    get:
+      consumes:
+      - application/json
+      description: Getting a list of movies
+      parameters:
+      - description: Number of films
+        in: path
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: GetListMovies
+      tags:
+      - Get
+  /get/genre/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Getting genre
+      parameters:
+      - description: id genre
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get genre
+      tags:
+      - Get
+  /get/movie/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Getting the name of the movie and its description
+      parameters:
+      - description: id movie
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get movie
+      tags:
+      - Get
+  /get/movieByGenres/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Getting movies with the selected genre
+      parameters:
+      - description: id genre
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: GetMovieByGenre
+      tags:
+      - Get
+  /movie/add/:
+    post:
+      consumes:
+      - application/json
+      description: Сreating a movie record
+      parameters:
+      - description: Title and description of the film
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Movie'
+      produces:
+      - application/json
+      responses: {}
+      summary: CreateMovie
+      tags:
+      - Create
+  /movie/delete/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Deleting data from a table
+      parameters:
+      - description: id movie
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: DeleteMovie
+      tags:
+      - Delete
+  /movie/update/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Updating values in the table movie
+      parameters:
+      - description: id movie
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New values
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Movie'
+      produces:
+      - application/json
+      responses: {}
+      summary: UpdateMovie
+      tags:
+      - Update
+  /movieGenres/add/:
+    post:
+      consumes:
+      - application/json
+      description: Сreating a movie record
+      parameters:
+      - description: Linking genres to a film
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Movie_genre'
+      produces:
+      - application/json
+      responses: {}
+      summary: CreateMovieGenres
+      tags:
+      - Create
+  /movieGenres/delete/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Deleting data from a table
+      parameters:
+      - description: id movieGenres
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: DeleteMovieGenres
+      tags:
+      - Delete
+  /movieGenres/update/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Updating values in the table movieGenres
+      parameters:
+      - description: id movie_genre
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New values
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Movie_genre'
+      produces:
+      - application/json
+      responses: {}
+      summary: UpdateMovieGenres
+      tags:
+      - Update
+swagger: "2.0"
