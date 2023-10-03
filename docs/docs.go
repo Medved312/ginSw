@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/genre/add/": {
-            "post": {
-                "description": "Сreating a movie record",
+        "/all-genres": {
+            "get": {
+                "description": "Получение списка жанров",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,7 +25,33 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Create"
+                    "Genres"
+                ],
+                "summary": "Get genre",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/views.GenreView"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/genre/add/": {
+            "post": {
+                "description": "Добавление жанра в базу",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Genres"
                 ],
                 "summary": "CreateGenre",
                 "parameters": [
@@ -35,16 +61,16 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Genre"
+                            "$ref": "#/definitions/saveDTO.GenreDTO"
                         }
                     }
                 ],
                 "responses": {}
             }
         },
-        "/genre/delete/{id}": {
-            "post": {
-                "description": "Deleting data from a table",
+        "/genre/{id}": {
+            "get": {
+                "description": "Получение жанра",
                 "consumes": [
                     "application/json"
                 ],
@@ -52,9 +78,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Delete"
+                    "Genres"
                 ],
-                "summary": "DeleteGenres",
+                "summary": "Get genre",
                 "parameters": [
                     {
                         "type": "integer",
@@ -64,12 +90,17 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
-            }
-        },
-        "/genre/update/{id}": {
-            "post": {
-                "description": "Updating values in the table genre",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.GenreView"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновление данных жанра",
                 "consumes": [
                     "application/json"
                 ],
@@ -77,7 +108,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Update"
+                    "Genres"
                 ],
                 "summary": "UpdateGenres",
                 "parameters": [
@@ -99,11 +130,9 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
-            }
-        },
-        "/get": {
-            "get": {
-                "description": "Привествие",
+            },
+            "delete": {
+                "description": "Удаление жанра из базы",
                 "consumes": [
                     "application/json"
                 ],
@@ -111,100 +140,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Hello"
+                    "Genres"
                 ],
-                "summary": "Hello",
-                "responses": {}
-            }
-        },
-        "/get/Movie/{limit}": {
-            "get": {
-                "description": "Getting a list of movies",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Get"
-                ],
-                "summary": "GetListMovies",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Number of films",
-                        "name": "limit",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/get/genre/{id}": {
-            "get": {
-                "description": "Getting genre",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Get"
-                ],
-                "summary": "Get genre",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id genre",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/get/movie/{id}": {
-            "get": {
-                "description": "Getting the name of the movie and its description",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Get"
-                ],
-                "summary": "Get movie",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id movie",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/get/movieByGenres/{id}": {
-            "get": {
-                "description": "Getting movies with the selected genre",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Get"
-                ],
-                "summary": "GetMovieByGenre",
+                "summary": "DeleteGenres",
                 "parameters": [
                     {
                         "type": "integer",
@@ -219,7 +157,7 @@ const docTemplate = `{
         },
         "/movie/add/": {
             "post": {
-                "description": "Сreating a movie record",
+                "description": "Добавление фильма в базу",
                 "consumes": [
                     "application/json"
                 ],
@@ -227,7 +165,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Create"
+                    "Movies"
                 ],
                 "summary": "CreateMovie",
                 "parameters": [
@@ -237,16 +175,16 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Movie"
+                            "$ref": "#/definitions/saveDTO.MovieDTO"
                         }
                     }
                 ],
                 "responses": {}
             }
         },
-        "/movie/delete/{id}": {
-            "post": {
-                "description": "Deleting data from a table",
+        "/movie/{id}": {
+            "get": {
+                "description": "Получение фильма",
                 "consumes": [
                     "application/json"
                 ],
@@ -254,9 +192,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Delete"
+                    "Movies"
                 ],
-                "summary": "DeleteMovie",
+                "summary": "Get movie",
                 "parameters": [
                     {
                         "type": "integer",
@@ -266,12 +204,17 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
-            }
-        },
-        "/movie/update/{id}": {
-            "post": {
-                "description": "Updating values in the table movie",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/views.MovieView"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновление данных фильма",
                 "consumes": [
                     "application/json"
                 ],
@@ -279,7 +222,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Update"
+                    "Movies"
                 ],
                 "summary": "UpdateMovie",
                 "parameters": [
@@ -301,11 +244,9 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
-            }
-        },
-        "/movieGenres/add/": {
-            "post": {
-                "description": "Сreating a movie record",
+            },
+            "delete": {
+                "description": "Удаление фильма из базы",
                 "consumes": [
                     "application/json"
                 ],
@@ -313,77 +254,16 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Create"
+                    "Movies"
                 ],
-                "summary": "CreateMovieGenres",
-                "parameters": [
-                    {
-                        "description": "Linking genres to a film",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Movie_genre"
-                        }
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/movieGenres/delete/{id}": {
-            "post": {
-                "description": "Deleting data from a table",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Delete"
-                ],
-                "summary": "DeleteMovieGenres",
+                "summary": "DeleteMovie",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id movieGenres",
+                        "description": "id movie",
                         "name": "id",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/movieGenres/update/{id}": {
-            "post": {
-                "description": "Updating values in the table movieGenres",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Update"
-                ],
-                "summary": "UpdateMovieGenres",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id movie_genre",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "New values",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Movie_genre"
-                        }
                     }
                 ],
                 "responses": {}
@@ -397,6 +277,12 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "movies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Movie"
+                    }
+                },
                 "name_genre": {
                     "type": "string"
                 }
@@ -408,6 +294,12 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Genre"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -416,16 +308,58 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Movie_genre": {
+        "saveDTO.GenreDTO": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "saveDTO.MovieDTO": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id_genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "views.GenreView": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "id_genre": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "views.MovieView": {
+            "type": "object",
+            "properties": {
+                "description": {
                     "type": "string"
                 },
-                "id_movie": {
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/views.GenreView"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
+	"os"
 
-	_ "github.com/lib/pq"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"main/database"
 	"main/handlers"
 )
 
@@ -17,25 +17,30 @@ import (
 // @host localhost:5050
 
 func main() {
-	database.Init()
+
+	logFile, err := os.OpenFile("log.err", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	log.SetOutput(logFile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	defer logFile.Close()
+
 	router := gin.Default()
 
-	router.GET("/get/Movie/:limit", handlers.GetListMovieHandler)
-	router.GET("/get/movie/:id", handlers.GetMovieHandler)
-	router.GET("/get/genre/:id", handlers.GetGenreHandler)
-	router.GET("/get/movieByGenres/:id", handlers.GetMovieByGenre)
+	router.GET("/movie/:id", handlers.GetMovieHandler)
+	router.GET("/genre/:id", handlers.GetGenreHandler)
+	router.GET("/all-genres/", handlers.GetAllGenreHandler)
 
 	router.POST("/movie/add/", handlers.CreateMovieHandler)
 	router.POST("/genre/add/", handlers.CreateGenreHandler)
-	router.POST("/movieGenres/add/", handlers.CreateMovieGenresHandler)
 
-	router.POST("/movie/delete/:id", handlers.DeleteMovieHandler)
-	router.POST("/genre/delete/:id", handlers.DeleteGenreHandler)
-	router.POST("/movieGenres/delete/:id", handlers.DeleteMovieGenresHandler)
+	router.DELETE("/movie/:id", handlers.DeleteMovieHandler)
+	router.DELETE("/genre/:id", handlers.DeleteGenreHandler)
 
-	router.POST("/movie/update/:id", handlers.UpdateMovieHandler)
-	router.POST("/genre/update/:id", handlers.UpdateGenreHandler)
-	router.POST("/movieGenres/update/:id", handlers.UpdateMovieGenresHandler)
+	router.PUT("/movie/:id", handlers.UpdateMovieHandler)
+	router.PUT("/genre/:id", handlers.UpdateGenreHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		// In gin this is how you return a JSON response

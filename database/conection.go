@@ -2,7 +2,8 @@ package database
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"main/model"
 	"time"
@@ -11,11 +12,15 @@ import (
 var dbase *gorm.DB
 
 func Init() *gorm.DB {
-	var db, err = gorm.Open("postgres", "user=postgres password=123 dbname=kinopoisk sslmode=disable")
+	connectionString := "user=postgres password=123 dbname=kinopoisk sslmode=disable"
+	var db, err = gorm.Open(postgres.Open(connectionString))
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&model.Movie{}, &model.Genre{}, &model.Movie_genre{})
+	err = db.AutoMigrate(&model.Movie{}, &model.Genre{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	return db
 }
 
