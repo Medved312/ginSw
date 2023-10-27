@@ -1,59 +1,35 @@
 definitions:
-  model.Genre:
-    properties:
-      id:
-        type: integer
-      movies:
-        items:
-          $ref: '#/definitions/model.Movie'
-        type: array
-      name_genre:
-        type: string
-    type: object
-  model.Movie:
-    properties:
-      description:
-        type: string
-      genres:
-        items:
-          $ref: '#/definitions/model.Genre'
-        type: array
-      id:
-        type: integer
-      name_movie:
-        type: string
-    type: object
-  saveDTO.GenreDTO:
+  saveDTO.CategoryDTO:
     properties:
       name:
         type: string
     type: object
-  saveDTO.MovieDTO:
+  saveDTO.ProductDTO:
     properties:
       description:
         type: string
-      id_genres:
+      idCategories:
         items:
           type: integer
         type: array
       name:
         type: string
     type: object
-  views.GenreView:
+  views.CategoryView:
     properties:
       id:
         type: integer
       name:
         type: string
     type: object
-  views.MovieView:
+  views.ProductView:
     properties:
+      Categories:
+        items:
+          $ref: '#/definitions/views.CategoryView'
+        type: array
       description:
         type: string
-      genres:
-        items:
-          $ref: '#/definitions/views.GenreView'
-        type: array
       id:
         type: integer
       name:
@@ -66,30 +42,28 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /all-genres:
+  /all-categories:
     get:
       consumes:
       - application/json
-      description: Получение списка жанров
+      description: Получение списка категорий
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/views.GenreView'
-            type: array
-      summary: Get genre
+            $ref: '#/definitions/views.CategoryView'
+      summary: GetCategory
       tags:
-      - Genres
-  /genre/{id}:
+      - Category
+  /category/{id}:
     delete:
       consumes:
       - application/json
-      description: Удаление жанра из базы
+      description: Удаление категории из базы
       parameters:
-      - description: id genre
+      - description: id категории
         in: path
         name: id
         required: true
@@ -97,15 +71,15 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: DeleteGenres
+      summary: DeleteCategory
       tags:
-      - Genres
+      - Category
     get:
       consumes:
       - application/json
       description: Получение жанра
       parameters:
-      - description: id genre
+      - description: id category
         in: path
         name: id
         required: true
@@ -116,57 +90,57 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/views.GenreView'
-      summary: Get genre
+            $ref: '#/definitions/views.CategoryView'
+      summary: GetCategory
       tags:
-      - Genres
+      - Category
     put:
       consumes:
       - application/json
-      description: Обновление данных жанра
+      description: Обновление данных категории
       parameters:
-      - description: id genre
+      - description: id категории
         in: path
         name: id
         required: true
         type: integer
-      - description: New values
+      - description: Новые значения
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.Genre'
+          $ref: '#/definitions/saveDTO.CategoryDTO'
       produces:
       - application/json
       responses: {}
-      summary: UpdateGenres
+      summary: UpdateCategory
       tags:
-      - Genres
-  /genre/add/:
+      - Category
+  /category/add/:
     post:
       consumes:
       - application/json
-      description: Добавление жанра в базу
+      description: Добавление категории в базу
       parameters:
-      - description: Сreating a genre
+      - description: создание категории
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/saveDTO.GenreDTO'
+          $ref: '#/definitions/saveDTO.CategoryDTO'
       produces:
       - application/json
       responses: {}
-      summary: CreateGenre
+      summary: CreateCategory
       tags:
-      - Genres
-  /movie/{id}:
+      - Category
+  /product/{id}:
     delete:
       consumes:
       - application/json
-      description: Удаление фильма из базы
+      description: Удаление продукта из базы
       parameters:
-      - description: id movie
+      - description: id продукта
         in: path
         name: id
         required: true
@@ -174,15 +148,15 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: DeleteMovie
+      summary: DeleteProduct
       tags:
-      - Movies
+      - Product
     get:
       consumes:
       - application/json
-      description: Получение фильма
+      description: Получение продукта
       parameters:
-      - description: id movie
+      - description: id продукта
         in: path
         name: id
         required: true
@@ -193,48 +167,48 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/views.MovieView'
-      summary: Get movie
+            $ref: '#/definitions/views.ProductView'
+      summary: GetProduct
       tags:
-      - Movies
+      - Product
     put:
       consumes:
       - application/json
-      description: Обновление данных фильма
+      description: Обновление данных продукта
       parameters:
-      - description: id movie
+      - description: id продукта
         in: path
         name: id
         required: true
         type: integer
-      - description: New values
+      - description: Новые значения
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.Movie'
+          $ref: '#/definitions/saveDTO.ProductDTO'
       produces:
       - application/json
       responses: {}
-      summary: UpdateMovie
+      summary: UpdateProduct
       tags:
-      - Movies
-  /movie/add/:
+      - Product
+  /product/add/:
     post:
       consumes:
       - application/json
-      description: Добавление фильма в базу
+      description: Добавление продукта в базу
       parameters:
-      - description: Title and description of the film
+      - description: создание продукта
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/saveDTO.MovieDTO'
+          $ref: '#/definitions/saveDTO.ProductDTO'
       produces:
       - application/json
       responses: {}
-      summary: CreateMovie
+      summary: CreateProduct
       tags:
-      - Movies
+      - Product
 swagger: "2.0"

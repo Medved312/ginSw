@@ -16,15 +16,15 @@ import (
 	"strconv"
 )
 
-// @Summary      Get movie
-// @Description  Получение фильма
-// @Param        id path int true	"id movie"
-// @Tags         Movies
+// @Summary      GetProduct
+// @Description  Получение продукта
+// @Param        id path int true	"id продукта"
+// @Tags         Product
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.MovieView
-// @Router       /movie/{id} [get]
-func GetMovieHandler(c *gin.Context) {
+// @Success      200  {object}   views.ProductView
+// @Router       /product/{id} [get]
+func GetProductHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -32,7 +32,7 @@ func GetMovieHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetMovieById(uint(id))
+	result := GetProductById(uint(id))
 
 	if result == nil {
 		log.Println(fmt.Sprintf("фильм с id = %v не удалось найти", id))
@@ -43,35 +43,34 @@ func GetMovieHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToMovieView(result),
+		"result": mappers.MapToProductView(result),
 	})
 }
 
-func GetMovieById(id uint) *model.Movie {
+func GetProductById(id uint) *model.Product {
 
-	var movie *model.Movie
+	var Product *model.Product
 
-	result := database.GetDB().Model(&model.Movie{}).Preload("Genres").
-		Where("id = ?", id).Find(&movie)
+	result := database.GetDB().Model(&model.Product{}).Preload("Categories").
+		Where("id = ?", id).Find(&Product)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 		return nil
 	}
 
-	return movie
+	return Product
 }
 
-// @Summary      Get genre
+// @Summary      GetCategory
 // @Description  Получение жанра
-// @Param        id path int true	"id genre"
-// @Tags         Genres
+// @Param        id path int true	"id category"
+// @Tags         Category
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.GenreView
-// @Router       /genre/{id} [get]
-func GetGenreHandler(c *gin.Context) {
-	var genre model.Genre
+// @Success      200  {object}   views.CategoryView
+// @Router       /category/{id} [get]
+func GetCategoryHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -79,7 +78,7 @@ func GetGenreHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetGenreById(uint(id))
+	result := GetCategoryById(uint(id))
 	if result == nil {
 		log.Println(result, fmt.Sprintf("id = %v", id))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -89,34 +88,34 @@ func GetGenreHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToGenreView(&genre),
+		"result": mappers.MapToCategoryView(result),
 	})
 }
 
-func GetGenreById(id uint) *model.Genre {
-	var genre *model.Genre
-	result := database.GetDB().First(&genre, id)
+func GetCategoryById(id uint) *model.Category {
+	var category *model.Category
+	result := database.GetDB().First(&category, id)
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 
 		return nil
 	}
 
-	return genre
+	return category
 
 }
 
-// @Summary      Get genre
-// @Description  Получение списка жанров
-// @Tags         Genres
+// @Summary      GetCategory
+// @Description  Получение списка категорий
+// @Tags         Category
 // @Accept       json
 // @Produce      json
-// @Success      200  {array}   views.GenreView
-// @Router       /all-genres [get]
-func GetAllGenreHandler(c *gin.Context) {
-	var genre []*model.Genre
+// @Success      200  {object}   views.CategoryView
+// @Router       /all-categories [get]
+func GetAllCategoryHandler(c *gin.Context) {
+	var category []*model.Category
 
-	result := database.GetDB().Find(&genre)
+	result := database.GetDB().Find(&category)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -127,68 +126,68 @@ func GetAllGenreHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToGenreViews(genre),
+		"result": mappers.MapToCategoryViews(category),
 	})
 }
 
-// @Summary      CreateMovie
-// @Description  Добавление фильма в базу
-// @Param        input body saveDTO.MovieDTO  true  "Title and description of the film"
-// @Tags         Movies
+// @Summary      CreateProduct
+// @Description  Добавление продукта в базу
+// @Param        input body saveDTO.ProductDTO  true  "создание продукта"
+// @Tags         Product
 // @Accept       json
 // @Produce      json
-// @Router       /movie/add/ [post]
-func CreateMovieHandler(c *gin.Context) {
-	var movie *model.Movie
-	var createdMovie *saveDTO.MovieDTO
-	if err := c.ShouldBindJSON(&createdMovie); err != nil {
+// @Router       /product/add/ [post]
+func CreateProductHandler(c *gin.Context) {
+	var Product *model.Product
+	var createdProduct *saveDTO.ProductDTO
+	if err := c.ShouldBindJSON(&createdProduct); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var linkedGenres []*model.Genre
-	for _, genreID := range createdMovie.Genres {
-		linkedGenres = append(linkedGenres, &model.Genre{Id: genreID})
+	var linkedGenres []*model.Category
+	for _, categoryID := range createdProduct.Categories {
+		linkedGenres = append(linkedGenres, &model.Category{Id: categoryID})
 	}
-	movie = &model.Movie{
-		Name:        createdMovie.Name,
-		Description: createdMovie.Description,
-		Genres:      linkedGenres}
+	Product = &model.Product{
+		Name:        createdProduct.Name,
+		Description: createdProduct.Description,
+		Categories:  linkedGenres}
 
-	result := database.GetDB().Omit("genres").Create(&movie)
+	result := database.GetDB().Omit("category").Create(&Product)
 	if result.Error != nil {
-		log.Println(result.Error, &movie)
+		log.Println(result.Error, &Product)
 		c.JSON(400, gin.H{
 			"message": "Error adding to the database",
 		})
 		return
 	} else {
-		newMovie := GetMovieById(movie.Id)
+		newProduct := GetProductById(Product.Id)
 		c.JSON(200, gin.H{
-			"result": mappers.MapToMovieView(newMovie),
+			"result": mappers.MapToProductView(newProduct),
 		})
 	}
 
 }
 
-// @Summary      CreateGenre
-// @Description  Добавление жанра в базу
-// @Param        input body saveDTO.GenreDTO  true  "Сreating a genre"
-// @Tags         Genres
+// @Summary      CreateCategory
+// @Description  Добавление категории в базу
+// @Param        input body saveDTO.CategoryDTO  true  "создание категории"
+// @Tags         Category
 // @Accept       json
 // @Produce      json
-// @Router       /genre/add/ [post]
-func CreateGenreHandler(c *gin.Context) {
-	var genre *model.Genre
+// @Router       /category/add/ [post]
+func CreateCategoryHandler(c *gin.Context) {
+	var category *model.Category
 
-	if err := c.ShouldBindJSON(&genre); err != nil {
-		log.Println(err.Error(), &genre)
+	if err := c.ShouldBindJSON(&category); err != nil {
+		log.Println(err.Error(), &category)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON format"})
 		return
 	}
 
-	row := database.GetDB().Where("name = ?", genre.Name).First(&genre)
+	row := database.GetDB().Where("name = ?", category.Name).First(&category)
 	if row.Error != nil {
-		result := database.GetDB().Create(&genre)
+		result := database.GetDB().Create(&category)
 
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -196,9 +195,9 @@ func CreateGenreHandler(c *gin.Context) {
 				"message": "Error when adding",
 			})
 		} else {
-			newGenre := GetGenreById(genre.Id)
+			newGenre := GetCategoryById(category.Id)
 			c.JSON(200, gin.H{
-				"result": mappers.MapToGenreView(newGenre),
+				"result": mappers.MapToCategoryView(newGenre),
 			})
 		}
 	} else {
@@ -208,15 +207,15 @@ func CreateGenreHandler(c *gin.Context) {
 	}
 }
 
-// @Summary      DeleteMovie
-// @Description  Удаление фильма из базы
-// @Param        id path int true	"id movie"
-// @Tags         Movies
+// @Summary      DeleteProduct
+// @Description  Удаление продукта из базы
+// @Param        id path int true	"id продукта"
+// @Tags         Product
 // @Accept       json
 // @Produce      json
-// @Router       /movie/{id}  [delete]
-func DeleteMovieHandler(c *gin.Context) {
-	var movie *model.Movie
+// @Router       /product/{id}  [delete]
+func DeleteProductHandler(c *gin.Context) {
+	var product *model.Product
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -225,10 +224,10 @@ func DeleteMovieHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Movie{}).Preload("Genres").
-		Where("id = ?", id).Find(&movie)
-	database.GetDB().Model(movie).Association("Genres").Clear()
-	database.GetDB().Delete(&movie)
+	result := database.GetDB().Model(&model.Product{}).Preload("Categories").
+		Where("id = ?", id).Find(&product)
+	database.GetDB().Model(product).Association("Categories").Clear()
+	database.GetDB().Delete(&product)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -242,15 +241,15 @@ func DeleteMovieHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      DeleteGenres
-// @Description  Удаление жанра из базы
-// @Param        id path int true	"id genre"
-// @Tags         Genres
+// @Summary      DeleteCategory
+// @Description  Удаление категории из базы
+// @Param        id path int true	"id категории"
+// @Tags         Category
 // @Accept       json
 // @Produce      json
-// @Router       /genre/{id}  [delete]
+// @Router       /category/{id}  [delete]
 func DeleteGenreHandler(c *gin.Context) {
-	var genre []*model.Genre
+	var Category []*model.Category
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -258,10 +257,10 @@ func DeleteGenreHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Genre{}).Preload("Movies").
-		Where("id = ?", id).Find(&genre)
-	database.GetDB().Model(genre).Association("Movies").Clear()
-	database.GetDB().Delete(&genre)
+	result := database.GetDB().Model(&model.Category{}).Preload("Product").
+		Where("id = ?", id).Find(&Category)
+	database.GetDB().Model(Category).Association("Product").Clear()
+	database.GetDB().Delete(&Category)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -275,41 +274,41 @@ func DeleteGenreHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      UpdateMovie
-// @Description  Обновление данных фильма
-// @Param		 id path int true	"id movie"
-// @Param        input body model.Movie  true  "New values"
-// @Tags         Movies
+// @Summary      UpdateProduct
+// @Description  Обновление данных продукта
+// @Param		 id path int true	"id продукта"
+// @Param        input body saveDTO.ProductDTO  true  "Новые значения"
+// @Tags         Product
 // @Accept       json
 // @Produce      json
-// @Router       /movie/{id}  [put]
-func UpdateMovieHandler(c *gin.Context) {
-	var movie *model.Movie = &model.Movie{}
-	var upMovie *model.Movie = &model.Movie{}
+// @Router       /product/{id}  [put]
+func UpdateProductHandler(c *gin.Context) {
+	var product *model.Product = &model.Product{}
+	var upProduct *model.Product = &model.Product{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upMovie); err != nil {
+	if err := c.ShouldBindJSON(&upProduct); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&movie)
+	result := database.GetDB().Where("id = ?", value).First(&product)
 
 	if result.Error != nil {
 		c.JSON(404, gin.H{
 			"result": result,
 		})
 	} else {
-		if upMovie.Name != "" {
-			movie.Name = upMovie.Name
+		if upProduct.Name != "" {
+			product.Name = upProduct.Name
 		}
-		if upMovie.Description != "" {
-			movie.Description = upMovie.Description
+		if upProduct.Description != "" {
+			product.Description = upProduct.Description
 		}
-		database.GetDB().Save(&movie)
+		database.GetDB().Save(&product)
 		c.JSON(200, gin.H{
 			"resulst": result,
 		})
@@ -317,28 +316,28 @@ func UpdateMovieHandler(c *gin.Context) {
 
 }
 
-// @Summary      UpdateGenres
-// @Description  Обновление данных жанра
-// @Param		 id path int true	"id genre"
-// @Param        input body model.Genre  true  "New values"
-// @Tags         Genres
+// @Summary      UpdateCategory
+// @Description  Обновление данных категории
+// @Param		 id path int true	"id категории"
+// @Param        input body saveDTO.CategoryDTO  true  "Новые значения"
+// @Tags         Category
 // @Accept       json
 // @Produce      json
-// @Router       /genre/{id}  [put]
-func UpdateGenreHandler(c *gin.Context) {
-	var genre *model.Genre = &model.Genre{}
-	var upGenre *model.Genre = &model.Genre{}
+// @Router       /category/{id}  [put]
+func UpdateCategoryHandler(c *gin.Context) {
+	var category *model.Category = &model.Category{}
+	var upCategory *model.Category = &model.Category{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upGenre); err != nil {
+	if err := c.ShouldBindJSON(&upCategory); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&genre)
+	result := database.GetDB().Where("id = ?", value).First(&category)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -347,11 +346,11 @@ func UpdateGenreHandler(c *gin.Context) {
 		})
 		return
 	} else {
-		if upGenre.Name != "" {
-			genre.Name = upGenre.Name
+		if upCategory.Name != "" {
+			category.Name = upCategory.Name
 		}
 
-		database.GetDB().Save(&genre)
+		database.GetDB().Save(&category)
 		c.JSON(200, gin.H{
 			"result": result,
 		})

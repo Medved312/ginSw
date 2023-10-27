@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"main/database"
 	"os"
 
 	swaggerfiles "github.com/swaggo/files"
@@ -20,6 +21,8 @@ func main() {
 
 	logFile, err := os.OpenFile("log.err", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 
+	database.Init()
+
 	if err != nil {
 		log.Panic(err)
 	}
@@ -29,18 +32,18 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/movie/:id", handlers.GetMovieHandler)
-	router.GET("/genre/:id", handlers.GetGenreHandler)
-	router.GET("/all-genres/", handlers.GetAllGenreHandler)
+	router.GET("/product/:id", handlers.GetProductHandler)
+	router.GET("/category/:id", handlers.GetCategoryHandler)
+	router.GET("/all-categories/", handlers.GetAllCategoryHandler)
 
-	router.POST("/movie/add/", handlers.CreateMovieHandler)
-	router.POST("/genre/add/", handlers.CreateGenreHandler)
+	router.POST("/product/add/", handlers.CreateProductHandler)
+	router.POST("/category/add/", handlers.CreateCategoryHandler)
 
-	router.DELETE("/movie/:id", handlers.DeleteMovieHandler)
-	router.DELETE("/genre/:id", handlers.DeleteGenreHandler)
+	router.DELETE("/product/:id", handlers.DeleteProductHandler)
+	router.DELETE("/category/:id", handlers.DeleteGenreHandler)
 
-	router.PUT("/movie/:id", handlers.UpdateMovieHandler)
-	router.PUT("/genre/:id", handlers.UpdateGenreHandler)
+	router.PUT("/product/:id", handlers.UpdateProductHandler)
+	router.PUT("/category/:id", handlers.UpdateCategoryHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		// In gin this is how you return a JSON response

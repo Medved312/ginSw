@@ -1,13 +1,19 @@
 package model
 
-type Movie struct {
-	Id          uint     `json:"id" gorm:"primaryKey"`
-	Name        string   `json:"name_movie"`
-	Description string   `json:"description"`
-	Genres      []*Genre `gorm:"many2many:movie_genres"`
+type Product struct {
+	Id          uint `gorm:"primaryKey"`
+	Name        string
+	Description string
+	Categories  []*Category `gorm:"many2many:productCategory"`
 }
-type Genre struct {
-	Id     uint     `json:"id" gorm:"primaryKey"`
-	Name   string   `json:"name_genre"`
-	Movies []*Movie `gorm:"many2many:movie_genres"`
+type Category struct {
+	Id      uint `gorm:"primaryKey"`
+	Name    string
+	Product []*Product `gorm:"many2many:productCategory"`
+}
+
+type Order struct {
+	Id       uint `gorm:"primaryKey"`
+	Name     string
+	quantity uint
 }

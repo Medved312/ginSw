@@ -1,6 +1,6 @@
 package views
 
-type GenreView struct {
+type CategoryView struct {
 	Id   uint   `json:"id"`
 	Name string `json:"name"`
 }
