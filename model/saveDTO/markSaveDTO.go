@@ -1,5 +1,5 @@
 package saveDTO
 
-type CategoryDTO struct {
+type MarkDTO struct {
 	Name string `json:"name"`
 }

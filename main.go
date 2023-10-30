@@ -32,18 +32,18 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/product/:id", handlers.GetProductHandler)
-	router.GET("/category/:id", handlers.GetCategoryHandler)
-	router.GET("/all-categories/", handlers.GetAllCategoryHandler)
+	router.GET("/car/:id", handlers.GetCarHandler)
+	router.GET("/mark/:id", handlers.GetMarkHandler)
+	router.GET("/all-mark/", handlers.GetAllMarkHandler)
 
-	router.POST("/product/add/", handlers.CreateProductHandler)
-	router.POST("/category/add/", handlers.CreateCategoryHandler)
+	router.POST("/car/add/", handlers.CreateCarHandler)
+	router.POST("/mark/add/", handlers.CreateMarkHandler)
 
-	router.DELETE("/product/:id", handlers.DeleteProductHandler)
-	router.DELETE("/category/:id", handlers.DeleteGenreHandler)
+	router.DELETE("/car/:id", handlers.DeleteCarHandler)
+	router.DELETE("/mark/:id", handlers.DeleteMarkHandler)
 
-	router.PUT("/product/:id", handlers.UpdateProductHandler)
-	router.PUT("/category/:id", handlers.UpdateCategoryHandler)
+	router.PUT("/car/:id", handlers.UpdateCarHandler)
+	router.PUT("/mark/:id", handlers.UpdateMarkHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		// In gin this is how you return a JSON response

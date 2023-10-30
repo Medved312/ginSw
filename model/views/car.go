@@ -1,6 +1,7 @@
-package saveDTO
+package views
 
-type CarDTO struct {
+type CarView struct {
+	Id          uint   `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }

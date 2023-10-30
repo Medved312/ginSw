@@ -16,15 +16,15 @@ import (
 	"strconv"
 )
 
-// @Summary      GetProduct
-// @Description  Получение продукта
-// @Param        id path int true	"id продукта"
-// @Tags         Product
+// @Summary      GetCar
+// @Description  Получение автомобиля
+// @Param        id path int true	"id автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.ProductView
-// @Router       /product/{id} [get]
-func GetProductHandler(c *gin.Context) {
+// @Success      200  {object}   views.CarView
+// @Router       /car/{id} [get]
+func GetCarHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -32,7 +32,7 @@ func GetProductHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetProductById(uint(id))
+	result := GetCarById(uint(id))
 
 	if result == nil {
 		log.Println(fmt.Sprintf("фильм с id = %v не удалось найти", id))
@@ -43,34 +43,34 @@ func GetProductHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToProductView(result),
+		"result": mappers.MapToCarView(result),
 	})
 }
 
-func GetProductById(id uint) *model.Product {
+func GetCarById(id uint) *model.Car {
 
-	var Product *model.Product
+	var Car *model.Car
 
-	result := database.GetDB().Model(&model.Product{}).Preload("Categories").
-		Where("id = ?", id).Find(&Product)
+	result := database.GetDB().Model(&model.Car{}).Preload("Categories").
+		Where("id = ?", id).Find(&Car)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 		return nil
 	}
 
-	return Product
+	return Car
 }
 
-// @Summary      GetCategory
-// @Description  Получение жанра
-// @Param        id path int true	"id category"
-// @Tags         Category
+// @Summary      GetMark
+// @Description  Получение марки
+// @Param        id path int true	"id марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.CategoryView
-// @Router       /category/{id} [get]
-func GetCategoryHandler(c *gin.Context) {
+// @Success      200  {object}   views.MarkView
+// @Router       /mark/{id} [get]
+func GetMarkHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -78,7 +78,7 @@ func GetCategoryHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetCategoryById(uint(id))
+	result := GetMarkById(uint(id))
 	if result == nil {
 		log.Println(result, fmt.Sprintf("id = %v", id))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -88,34 +88,34 @@ func GetCategoryHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToCategoryView(result),
+		"result": mappers.MapToMarkView(result),
 	})
 }
 
-func GetCategoryById(id uint) *model.Category {
-	var category *model.Category
-	result := database.GetDB().First(&category, id)
+func GetMarkById(id uint) *model.Mark {
+	var mark *model.Mark
+	result := database.GetDB().First(&mark, id)
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 
 		return nil
 	}
 
-	return category
+	return mark
 
 }
 
-// @Summary      GetCategory
-// @Description  Получение списка категорий
-// @Tags         Category
+// @Summary      GetMark
+// @Description  Получение списка марок
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.CategoryView
-// @Router       /all-categories [get]
-func GetAllCategoryHandler(c *gin.Context) {
-	var category []*model.Category
+// @Success      200  {object}   views.MarkView
+// @Router       /all-mark [get]
+func GetAllMarkHandler(c *gin.Context) {
+	var marks []*model.Mark
 
-	result := database.GetDB().Find(&category)
+	result := database.GetDB().Find(&marks)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -126,68 +126,63 @@ func GetAllCategoryHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToCategoryViews(category),
+		"result": mappers.MapToMarkViews(marks),
 	})
 }
 
-// @Summary      CreateProduct
-// @Description  Добавление продукта в базу
-// @Param        input body saveDTO.ProductDTO  true  "создание продукта"
-// @Tags         Product
+// @Summary      CreateCar
+// @Description  Добавление автомобиля в базу
+// @Param        input body saveDTO.CarDTO  true  "создание автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /product/add/ [post]
-func CreateProductHandler(c *gin.Context) {
-	var Product *model.Product
-	var createdProduct *saveDTO.ProductDTO
-	if err := c.ShouldBindJSON(&createdProduct); err != nil {
+// @Router       /car/add/ [post]
+func CreateCarHandler(c *gin.Context) {
+	var Car *model.Car
+	var createdCar *saveDTO.CarDTO
+	if err := c.ShouldBindJSON(&createdCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var linkedGenres []*model.Category
-	for _, categoryID := range createdProduct.Categories {
-		linkedGenres = append(linkedGenres, &model.Category{Id: categoryID})
-	}
-	Product = &model.Product{
-		Name:        createdProduct.Name,
-		Description: createdProduct.Description,
-		Categories:  linkedGenres}
 
-	result := database.GetDB().Omit("category").Create(&Product)
+	Car = &model.Car{
+		Description: createdCar.Description}
+
+	result := database.GetDB().Omit("category").Create(&Car)
 	if result.Error != nil {
-		log.Println(result.Error, &Product)
+		log.Println(result.Error, &Car)
 		c.JSON(400, gin.H{
 			"message": "Error adding to the database",
 		})
 		return
 	} else {
-		newProduct := GetProductById(Product.Id)
+		newProduct := GetCarById(Car.ID)
 		c.JSON(200, gin.H{
-			"result": mappers.MapToProductView(newProduct),
+			"result": mappers.MapToCarView(newProduct),
 		})
 	}
 
 }
 
-// @Summary      CreateCategory
-// @Description  Добавление категории в базу
-// @Param        input body saveDTO.CategoryDTO  true  "создание категории"
-// @Tags         Category
+// @Summary      CreateMark
+// @Description  Добавление марки в базу
+// @Param        input body saveDTO.MarkDTO  true  "создание марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /category/add/ [post]
-func CreateCategoryHandler(c *gin.Context) {
-	var category *model.Category
+// @Router       /mark/add/ [post]
+func CreateMarkHandler(c *gin.Context) {
+	var mark *model.Mark
 
-	if err := c.ShouldBindJSON(&category); err != nil {
-		log.Println(err.Error(), &category)
+	if err := c.ShouldBindJSON(&mark); err != nil {
+		log.Println(err.Error(), &mark)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON format"})
 		return
 	}
 
-	row := database.GetDB().Where("name = ?", category.Name).First(&category)
+	row := database.GetDB().Where("name = ?", mark.Name).First(&mark)
 	if row.Error != nil {
-		result := database.GetDB().Create(&category)
+		result := database.GetDB().Create(&mark)
 
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -195,9 +190,9 @@ func CreateCategoryHandler(c *gin.Context) {
 				"message": "Error when adding",
 			})
 		} else {
-			newGenre := GetCategoryById(category.Id)
+			newMark := GetMarkById(mark.ID)
 			c.JSON(200, gin.H{
-				"result": mappers.MapToCategoryView(newGenre),
+				"result": mappers.MapToMarkView(newMark),
 			})
 		}
 	} else {
@@ -207,15 +202,15 @@ func CreateCategoryHandler(c *gin.Context) {
 	}
 }
 
-// @Summary      DeleteProduct
-// @Description  Удаление продукта из базы
-// @Param        id path int true	"id продукта"
-// @Tags         Product
+// @Summary      DeleteCar
+// @Description  Удаление автомобиля из базы
+// @Param        id path int true	"id автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /product/{id}  [delete]
-func DeleteProductHandler(c *gin.Context) {
-	var product *model.Product
+// @Router       /car/{id}  [delete]
+func DeleteCarHandler(c *gin.Context) {
+	var car *model.Car
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -224,10 +219,10 @@ func DeleteProductHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Product{}).Preload("Categories").
-		Where("id = ?", id).Find(&product)
-	database.GetDB().Model(product).Association("Categories").Clear()
-	database.GetDB().Delete(&product)
+	result := database.GetDB().Model(&model.Car{}).Preload("Categories").
+		Where("id = ?", id).Find(&car)
+	database.GetDB().Model(car).Association("Categories").Clear()
+	database.GetDB().Delete(&car)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -241,15 +236,15 @@ func DeleteProductHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      DeleteCategory
-// @Description  Удаление категории из базы
-// @Param        id path int true	"id категории"
-// @Tags         Category
+// @Summary      DeleteMark
+// @Description  Удаление марки из базы
+// @Param        id path int true	"id марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /category/{id}  [delete]
-func DeleteGenreHandler(c *gin.Context) {
-	var Category []*model.Category
+// @Router       /mark/{id}  [delete]
+func DeleteMarkHandler(c *gin.Context) {
+	var mark []*model.Mark
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -257,10 +252,10 @@ func DeleteGenreHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Category{}).Preload("Product").
-		Where("id = ?", id).Find(&Category)
-	database.GetDB().Model(Category).Association("Product").Clear()
-	database.GetDB().Delete(&Category)
+	result := database.GetDB().Model(&model.Mark{}).Preload("Product").
+		Where("id = ?", id).Find(&mark)
+	database.GetDB().Model(mark).Association("Model").Clear()
+	database.GetDB().Delete(&mark)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -274,41 +269,41 @@ func DeleteGenreHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      UpdateProduct
-// @Description  Обновление данных продукта
-// @Param		 id path int true	"id продукта"
-// @Param        input body saveDTO.ProductDTO  true  "Новые значения"
-// @Tags         Product
+// @Summary      UpdateCar
+// @Description  Обновление данных автомобиля
+// @Param		 id path int true	"id автомобиля"
+// @Param        input body saveDTO.CarDTO  true  "Новые значения"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /product/{id}  [put]
-func UpdateProductHandler(c *gin.Context) {
-	var product *model.Product = &model.Product{}
-	var upProduct *model.Product = &model.Product{}
+// @Router       /car/{id}  [put]
+func UpdateCarHandler(c *gin.Context) {
+	var car *model.Car = &model.Car{}
+	var upCar *model.Car = &model.Car{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upProduct); err != nil {
+	if err := c.ShouldBindJSON(&upCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&product)
+	result := database.GetDB().Where("id = ?", value).First(&car)
 
 	if result.Error != nil {
 		c.JSON(404, gin.H{
 			"result": result,
 		})
 	} else {
-		if upProduct.Name != "" {
-			product.Name = upProduct.Name
+		if upCar.Description != "" {
+			car.Description = upCar.Description
 		}
-		if upProduct.Description != "" {
-			product.Description = upProduct.Description
+		if upCar.Description != "" {
+			car.Description = upCar.Description
 		}
-		database.GetDB().Save(&product)
+		database.GetDB().Save(&car)
 		c.JSON(200, gin.H{
 			"resulst": result,
 		})
@@ -316,28 +311,28 @@ func UpdateProductHandler(c *gin.Context) {
 
 }
 
-// @Summary      UpdateCategory
-// @Description  Обновление данных категории
-// @Param		 id path int true	"id категории"
-// @Param        input body saveDTO.CategoryDTO  true  "Новые значения"
-// @Tags         Category
+// @Summary      UpdateMark
+// @Description  Обновление данных марки
+// @Param		 id path int true	"id марки"
+// @Param        input body saveDTO.MarkDTO  true  "Новые значения"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /category/{id}  [put]
-func UpdateCategoryHandler(c *gin.Context) {
-	var category *model.Category = &model.Category{}
-	var upCategory *model.Category = &model.Category{}
+// @Router       /mark/{id}  [put]
+func UpdateMarkHandler(c *gin.Context) {
+	var mark *model.Mark = &model.Mark{}
+	var upMark *model.Mark = &model.Mark{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upCategory); err != nil {
+	if err := c.ShouldBindJSON(&upMark); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&category)
+	result := database.GetDB().Where("id = ?", value).First(&mark)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -346,11 +341,11 @@ func UpdateCategoryHandler(c *gin.Context) {
 		})
 		return
 	} else {
-		if upCategory.Name != "" {
-			category.Name = upCategory.Name
+		if upMark.Name != "" {
+			mark.Name = upMark.Name
 		}
 
-		database.GetDB().Save(&category)
+		database.GetDB().Save(&mark)
 		c.JSON(200, gin.H{
 			"result": result,
 		})

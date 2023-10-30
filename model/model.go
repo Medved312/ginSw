@@ -1,19 +1,30 @@
 package model
 
-type Product struct {
-	Id          uint `gorm:"primaryKey"`
-	Name        string
-	Description string
-	Categories  []*Category `gorm:"many2many:productCategory"`
+type Car struct {
+	ID             uint `gorm:"primaryKey"`
+	Price          string
+	Power          int
+	Consumption    float32
+	Overclocking   float32
+	MaxSpeed       int
+	Model          Model `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ModelID        uint
+	Description    string
+	Transmission   Transmission `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	TransmissionID uint
 }
-type Category struct {
-	Id      uint `gorm:"primaryKey"`
+type Mark struct {
+	ID      uint `gorm:"primaryKey"`
 	Name    string
-	Product []*Product `gorm:"many2many:productCategory"`
+	Model   Model `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ModelID uint
 }
 
-type Order struct {
-	Id       uint `gorm:"primaryKey"`
-	Name     string
-	quantity uint
+type Model struct {
+	ID   uint `gorm:"primaryKey"`
+	Name string
+}
+type Transmission struct {
+	ID   uint `gorm:"primaryKey"`
+	Name string
 }
