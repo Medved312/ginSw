@@ -1,13 +1,30 @@
 package model
 
-type Movie struct {
-	Id          uint     `json:"id" gorm:"primaryKey"`
-	Name        string   `json:"name_movie"`
-	Description string   `json:"description"`
-	Genres      []*Genre `gorm:"many2many:movie_genres"`
+type Car struct {
+	ID             uint `gorm:"primaryKey"`
+	Price          string
+	Power          int
+	Consumption    float32
+	Overclocking   float32
+	MaxSpeed       int
+	Model          Model `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ModelID        uint
+	Description    string
+	Transmission   Transmission `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	TransmissionID uint
 }
-type Genre struct {
-	Id     uint     `json:"id" gorm:"primaryKey"`
-	Name   string   `json:"name_genre"`
-	Movies []*Movie `gorm:"many2many:movie_genres"`
+type Mark struct {
+	ID      uint `gorm:"primaryKey"`
+	Name    string
+	Model   Model `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ModelID uint
+}
+
+type Model struct {
+	ID   uint `gorm:"primaryKey"`
+	Name string
+}
+type Transmission struct {
+	ID   uint `gorm:"primaryKey"`
+	Name string
 }

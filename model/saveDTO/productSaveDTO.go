@@ -1,7 +1,6 @@
 package saveDTO
 
-type MovieDTO struct {
+type CarDTO struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Genres      []uint `json:"id_genres"`
 }

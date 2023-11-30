@@ -16,15 +16,15 @@ import (
 	"strconv"
 )
 
-// @Summary      Get movie
-// @Description  Получение фильма
-// @Param        id path int true	"id movie"
-// @Tags         Movies
+// @Summary      GetCar
+// @Description  Получение автомобиля
+// @Param        id path int true	"id автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.MovieView
-// @Router       /movie/{id} [get]
-func GetMovieHandler(c *gin.Context) {
+// @Success      200  {object}   views.CarView
+// @Router       /car/{id} [get]
+func GetCarHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -32,7 +32,7 @@ func GetMovieHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetMovieById(uint(id))
+	result := GetCarById(uint(id))
 
 	if result == nil {
 		log.Println(fmt.Sprintf("фильм с id = %v не удалось найти", id))
@@ -43,35 +43,34 @@ func GetMovieHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToMovieView(result),
+		"result": mappers.MapToCarView(result),
 	})
 }
 
-func GetMovieById(id uint) *model.Movie {
+func GetCarById(id uint) *model.Car {
 
-	var movie *model.Movie
+	var Car *model.Car
 
-	result := database.GetDB().Model(&model.Movie{}).Preload("Genres").
-		Where("id = ?", id).Find(&movie)
+	result := database.GetDB().Model(&model.Car{}).Preload("Categories").
+		Where("id = ?", id).Find(&Car)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 		return nil
 	}
 
-	return movie
+	return Car
 }
 
-// @Summary      Get genre
-// @Description  Получение жанра
-// @Param        id path int true	"id genre"
-// @Tags         Genres
+// @Summary      GetMark
+// @Description  Получение марки
+// @Param        id path int true	"id марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}   views.GenreView
-// @Router       /genre/{id} [get]
-func GetGenreHandler(c *gin.Context) {
-	var genre model.Genre
+// @Success      200  {object}   views.MarkView
+// @Router       /mark/{id} [get]
+func GetMarkHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
 	if err != nil {
@@ -79,7 +78,7 @@ func GetGenreHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetGenreById(uint(id))
+	result := GetMarkById(uint(id))
 	if result == nil {
 		log.Println(result, fmt.Sprintf("id = %v", id))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -89,34 +88,34 @@ func GetGenreHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToGenreView(&genre),
+		"result": mappers.MapToMarkView(result),
 	})
 }
 
-func GetGenreById(id uint) *model.Genre {
-	var genre *model.Genre
-	result := database.GetDB().First(&genre, id)
+func GetMarkById(id uint) *model.Mark {
+	var mark *model.Mark
+	result := database.GetDB().First(&mark, id)
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 
 		return nil
 	}
 
-	return genre
+	return mark
 
 }
 
-// @Summary      Get genre
-// @Description  Получение списка жанров
-// @Tags         Genres
+// @Summary      GetMark
+// @Description  Получение списка марок
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Success      200  {array}   views.GenreView
-// @Router       /all-genres [get]
-func GetAllGenreHandler(c *gin.Context) {
-	var genre []*model.Genre
+// @Success      200  {object}   views.MarkView
+// @Router       /all-mark [get]
+func GetAllMarkHandler(c *gin.Context) {
+	var marks []*model.Mark
 
-	result := database.GetDB().Find(&genre)
+	result := database.GetDB().Find(&marks)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -127,68 +126,63 @@ func GetAllGenreHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToGenreViews(genre),
+		"result": mappers.MapToMarkViews(marks),
 	})
 }
 
-// @Summary      CreateMovie
-// @Description  Добавление фильма в базу
-// @Param        input body saveDTO.MovieDTO  true  "Title and description of the film"
-// @Tags         Movies
+// @Summary      CreateCar
+// @Description  Добавление автомобиля в базу
+// @Param        input body saveDTO.CarDTO  true  "создание автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /movie/add/ [post]
-func CreateMovieHandler(c *gin.Context) {
-	var movie *model.Movie
-	var createdMovie *saveDTO.MovieDTO
-	if err := c.ShouldBindJSON(&createdMovie); err != nil {
+// @Router       /car/add/ [post]
+func CreateCarHandler(c *gin.Context) {
+	var Car *model.Car
+	var createdCar *saveDTO.CarDTO
+	if err := c.ShouldBindJSON(&createdCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var linkedGenres []*model.Genre
-	for _, genreID := range createdMovie.Genres {
-		linkedGenres = append(linkedGenres, &model.Genre{Id: genreID})
-	}
-	movie = &model.Movie{
-		Name:        createdMovie.Name,
-		Description: createdMovie.Description,
-		Genres:      linkedGenres}
 
-	result := database.GetDB().Omit("genres").Create(&movie)
+	Car = &model.Car{
+		Description: createdCar.Description}
+
+	result := database.GetDB().Omit("category").Create(&Car)
 	if result.Error != nil {
-		log.Println(result.Error, &movie)
+		log.Println(result.Error, &Car)
 		c.JSON(400, gin.H{
 			"message": "Error adding to the database",
 		})
 		return
 	} else {
-		newMovie := GetMovieById(movie.Id)
+		newProduct := GetCarById(Car.ID)
 		c.JSON(200, gin.H{
-			"result": mappers.MapToMovieView(newMovie),
+			"result": mappers.MapToCarView(newProduct),
 		})
 	}
 
 }
 
-// @Summary      CreateGenre
-// @Description  Добавление жанра в базу
-// @Param        input body saveDTO.GenreDTO  true  "Сreating a genre"
-// @Tags         Genres
+// @Summary      CreateMark
+// @Description  Добавление марки в базу
+// @Param        input body saveDTO.MarkDTO  true  "создание марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /genre/add/ [post]
-func CreateGenreHandler(c *gin.Context) {
-	var genre *model.Genre
+// @Router       /mark/add/ [post]
+func CreateMarkHandler(c *gin.Context) {
+	var mark *model.Mark
 
-	if err := c.ShouldBindJSON(&genre); err != nil {
-		log.Println(err.Error(), &genre)
+	if err := c.ShouldBindJSON(&mark); err != nil {
+		log.Println(err.Error(), &mark)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON format"})
 		return
 	}
 
-	row := database.GetDB().Where("name = ?", genre.Name).First(&genre)
+	row := database.GetDB().Where("name = ?", mark.Name).First(&mark)
 	if row.Error != nil {
-		result := database.GetDB().Create(&genre)
+		result := database.GetDB().Create(&mark)
 
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -196,9 +190,9 @@ func CreateGenreHandler(c *gin.Context) {
 				"message": "Error when adding",
 			})
 		} else {
-			newGenre := GetGenreById(genre.Id)
+			newMark := GetMarkById(mark.ID)
 			c.JSON(200, gin.H{
-				"result": mappers.MapToGenreView(newGenre),
+				"result": mappers.MapToMarkView(newMark),
 			})
 		}
 	} else {
@@ -208,15 +202,15 @@ func CreateGenreHandler(c *gin.Context) {
 	}
 }
 
-// @Summary      DeleteMovie
-// @Description  Удаление фильма из базы
-// @Param        id path int true	"id movie"
-// @Tags         Movies
+// @Summary      DeleteCar
+// @Description  Удаление автомобиля из базы
+// @Param        id path int true	"id автомобиля"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /movie/{id}  [delete]
-func DeleteMovieHandler(c *gin.Context) {
-	var movie *model.Movie
+// @Router       /car/{id}  [delete]
+func DeleteCarHandler(c *gin.Context) {
+	var car *model.Car
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -225,10 +219,10 @@ func DeleteMovieHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Movie{}).Preload("Genres").
-		Where("id = ?", id).Find(&movie)
-	database.GetDB().Model(movie).Association("Genres").Clear()
-	database.GetDB().Delete(&movie)
+	result := database.GetDB().Model(&model.Car{}).Preload("Categories").
+		Where("id = ?", id).Find(&car)
+	database.GetDB().Model(car).Association("Categories").Clear()
+	database.GetDB().Delete(&car)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -242,15 +236,15 @@ func DeleteMovieHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      DeleteGenres
-// @Description  Удаление жанра из базы
-// @Param        id path int true	"id genre"
-// @Tags         Genres
+// @Summary      DeleteMark
+// @Description  Удаление марки из базы
+// @Param        id path int true	"id марки"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /genre/{id}  [delete]
-func DeleteGenreHandler(c *gin.Context) {
-	var genre []*model.Genre
+// @Router       /mark/{id}  [delete]
+func DeleteMarkHandler(c *gin.Context) {
+	var mark []*model.Mark
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -258,10 +252,10 @@ func DeleteGenreHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Model(&model.Genre{}).Preload("Movies").
-		Where("id = ?", id).Find(&genre)
-	database.GetDB().Model(genre).Association("Movies").Clear()
-	database.GetDB().Delete(&genre)
+	result := database.GetDB().Model(&model.Mark{}).Preload("Product").
+		Where("id = ?", id).Find(&mark)
+	database.GetDB().Model(mark).Association("Model").Clear()
+	database.GetDB().Delete(&mark)
 
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
@@ -275,41 +269,41 @@ func DeleteGenreHandler(c *gin.Context) {
 	})
 }
 
-// @Summary      UpdateMovie
-// @Description  Обновление данных фильма
-// @Param		 id path int true	"id movie"
-// @Param        input body model.Movie  true  "New values"
-// @Tags         Movies
+// @Summary      UpdateCar
+// @Description  Обновление данных автомобиля
+// @Param		 id path int true	"id автомобиля"
+// @Param        input body saveDTO.CarDTO  true  "Новые значения"
+// @Tags         Car
 // @Accept       json
 // @Produce      json
-// @Router       /movie/{id}  [put]
-func UpdateMovieHandler(c *gin.Context) {
-	var movie *model.Movie = &model.Movie{}
-	var upMovie *model.Movie = &model.Movie{}
+// @Router       /car/{id}  [put]
+func UpdateCarHandler(c *gin.Context) {
+	var car *model.Car = &model.Car{}
+	var upCar *model.Car = &model.Car{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upMovie); err != nil {
+	if err := c.ShouldBindJSON(&upCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&movie)
+	result := database.GetDB().Where("id = ?", value).First(&car)
 
 	if result.Error != nil {
 		c.JSON(404, gin.H{
 			"result": result,
 		})
 	} else {
-		if upMovie.Name != "" {
-			movie.Name = upMovie.Name
+		if upCar.Description != "" {
+			car.Description = upCar.Description
 		}
-		if upMovie.Description != "" {
-			movie.Description = upMovie.Description
+		if upCar.Description != "" {
+			car.Description = upCar.Description
 		}
-		database.GetDB().Save(&movie)
+		database.GetDB().Save(&car)
 		c.JSON(200, gin.H{
 			"resulst": result,
 		})
@@ -317,28 +311,28 @@ func UpdateMovieHandler(c *gin.Context) {
 
 }
 
-// @Summary      UpdateGenres
-// @Description  Обновление данных жанра
-// @Param		 id path int true	"id genre"
-// @Param        input body model.Genre  true  "New values"
-// @Tags         Genres
+// @Summary      UpdateMark
+// @Description  Обновление данных марки
+// @Param		 id path int true	"id марки"
+// @Param        input body saveDTO.MarkDTO  true  "Новые значения"
+// @Tags         Mark
 // @Accept       json
 // @Produce      json
-// @Router       /genre/{id}  [put]
-func UpdateGenreHandler(c *gin.Context) {
-	var genre *model.Genre = &model.Genre{}
-	var upGenre *model.Genre = &model.Genre{}
+// @Router       /mark/{id}  [put]
+func UpdateMarkHandler(c *gin.Context) {
+	var mark *model.Mark = &model.Mark{}
+	var upMark *model.Mark = &model.Mark{}
 	value, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upGenre); err != nil {
+	if err := c.ShouldBindJSON(&upMark); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&genre)
+	result := database.GetDB().Where("id = ?", value).First(&mark)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -347,11 +341,11 @@ func UpdateGenreHandler(c *gin.Context) {
 		})
 		return
 	} else {
-		if upGenre.Name != "" {
-			genre.Name = upGenre.Name
+		if upMark.Name != "" {
+			mark.Name = upMark.Name
 		}
 
-		database.GetDB().Save(&genre)
+		database.GetDB().Save(&mark)
 		c.JSON(200, gin.H{
 			"result": result,
 		})
