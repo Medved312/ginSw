@@ -1,7 +1,6 @@
-package views
+package saveDTO
 
-type CarView struct {
-	Id             uint `json:"id"`
+type CarDTO struct {
 	Price          string
 	Power          int
 	Consumption    float32

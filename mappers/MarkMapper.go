@@ -13,5 +13,8 @@ func MapToMarkViews(Marks []*model.Mark) []views.MarkView {
 	return result
 }
 func MapToMarkView(Mark *model.Mark) views.MarkView {
-	return views.MarkView{Id: Mark.ID, Name: Mark.Name}
+	return views.MarkView{
+		Id:      Mark.ID,
+		Name:    Mark.Name,
+		ModelID: Mark.ModelID}
 }

@@ -15,8 +15,14 @@ func MapToCarViews(Cars []*model.Car) []views.CarView {
 }
 func MapToCarView(Car *model.Car) views.CarView {
 	return views.CarView{
-		Id:          Car.ID,
-		Name:        Car.Description,
-		Description: Car.Description,
+		Id:             Car.ID,
+		Price:          Car.Price,
+		Power:          Car.Power,
+		Consumption:    Car.Consumption,
+		Overclocking:   Car.Overclocking,
+		MaxSpeed:       Car.MaxSpeed,
+		ModelID:        Car.ModelID,
+		TransmissionID: Car.TransmissionID,
+		Description:    Car.Description,
 	}
 }
