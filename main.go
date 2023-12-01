@@ -34,16 +34,20 @@ func main() {
 
 	router.GET("/car/:id", handlers.GetCarHandler)
 	router.GET("/mark/:id", handlers.GetMarkHandler)
+	router.GET("/model/:id", handlers.GetModelHandler)
 	router.GET("/all-mark/", handlers.GetAllMarkHandler)
 
 	router.POST("/car/add/", handlers.CreateCarHandler)
 	router.POST("/mark/add/", handlers.CreateMarkHandler)
+	router.POST("/model/add/", handlers.CreateModelHandler)
 
 	router.DELETE("/car/:id", handlers.DeleteCarHandler)
 	router.DELETE("/mark/:id", handlers.DeleteMarkHandler)
+	router.DELETE("/model/:id", handlers.DeleteModelHandler)
 
 	router.PUT("/car/:id", handlers.UpdateCarHandler)
 	router.PUT("/mark/:id", handlers.UpdateMarkHandler)
+	router.PUT("/model/:id", handlers.UpdateModelHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		// In gin this is how you return a JSON response
