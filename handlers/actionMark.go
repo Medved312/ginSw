@@ -3,8 +3,12 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/swaggo/files"       // swagger embed files
+	_ "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	_ "gorm.io/gorm"
 	"log"
 	"main/database"
+	_ "main/docs"
 	"main/mappers"
 	"main/model"
 	"net/http"

@@ -3,8 +3,12 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/swaggo/files"       // swagger embed files
+	_ "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	_ "gorm.io/gorm"
 	"log"
 	"main/database"
+	_ "main/docs"
 	"main/mappers"
 	"main/model"
 	"net/http"
@@ -12,13 +16,13 @@ import (
 )
 
 // @Summary      GetModel
-// @Description  Получение марки
-// @Param        id path int true	"id марки"
+// @Description  Получение модели
+// @Param        id path int true	"id модели"
 // @Tags         Model
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}   views.ModelView
-// @Router       /Model/{id} [get]
+// @Router       /model/{id} [get]
 func GetModelHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
@@ -27,7 +31,7 @@ func GetModelHandler(c *gin.Context) {
 		return
 	}
 
-	result := GetMarkById(uint(id))
+	result := GetModelById(uint(id))
 	if result == nil {
 		log.Println(result, fmt.Sprintf("id = %v", id))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -37,24 +41,24 @@ func GetModelHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToMarkView(result),
+		"result": mappers.MapToModelView(result),
 	})
 }
 
-func GetModelById(id uint) *model.Mark {
-	var mark *model.Mark
-	result := database.GetDB().First(&mark, id)
+func GetModelById(id uint) *model.Model {
+	var model *model.Model
+	result := database.GetDB().First(&model, id)
 	if result.Error != nil {
 		log.Println(result.Error, fmt.Sprintf("id = %v", id))
 
 		return nil
 	}
 
-	return mark
+	return model
 
 }
 
-// @Summary      GetModel
+// @Summary      GetAllModel
 // @Description  Получение списка марок
 // @Tags         Model
 // @Accept       json
@@ -62,9 +66,9 @@ func GetModelById(id uint) *model.Mark {
 // @Success      200  {object}   views.ModelView
 // @Router       /all-model [get]
 func GetAllModelHandler(c *gin.Context) {
-	var marks []*model.Mark
+	var models []*model.Model
 
-	result := database.GetDB().Find(&marks)
+	result := database.GetDB().Find(&models)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -75,7 +79,7 @@ func GetAllModelHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": mappers.MapToMarkViews(marks),
+		"result": mappers.MapToModelViews(models),
 	})
 }
 
@@ -85,19 +89,19 @@ func GetAllModelHandler(c *gin.Context) {
 // @Tags         Model
 // @Accept       json
 // @Produce      json
-// @Router       /Model/add/ [post]
+// @Router       /model/add/ [post]
 func CreateModelHandler(c *gin.Context) {
-	var mark *model.Mark
+	var model *model.Model
 
-	if err := c.ShouldBindJSON(&mark); err != nil {
-		log.Println(err.Error(), &mark)
+	if err := c.ShouldBindJSON(&model); err != nil {
+		log.Println(err.Error(), &model)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON format"})
 		return
 	}
 
-	row := database.GetDB().Where("name = ?", mark.Name).First(&mark)
+	row := database.GetDB().Where("name = ?", model.Name).First(&model)
 	if row.Error != nil {
-		result := database.GetDB().Create(&mark)
+		result := database.GetDB().Create(&model)
 
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -105,9 +109,9 @@ func CreateModelHandler(c *gin.Context) {
 				"message": "Error when adding",
 			})
 		} else {
-			newMark := GetMarkById(mark.ID)
+			newModel := GetModelById(model.ID)
 			c.JSON(200, gin.H{
-				"result": mappers.MapToMarkView(newMark),
+				"result": mappers.MapToModelView(newModel),
 			})
 		}
 	} else {
@@ -118,14 +122,14 @@ func CreateModelHandler(c *gin.Context) {
 }
 
 // @Summary      DeleteModel
-// @Description  Удаление марки из базы
-// @Param        id path int true	"id марки"
+// @Description  Удаление модели из базы
+// @Param        id path int true	"id модели"
 // @Tags         Model
 // @Accept       json
 // @Produce      json
 // @Router       /model/{id}  [delete]
 func DeleteModelHandler(c *gin.Context) {
-	var mark []*model.Mark
+	var model []*model.Model
 
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
@@ -133,8 +137,8 @@ func DeleteModelHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", id).Find(&mark)
-	database.GetDB().Delete(&mark)
+	result := database.GetDB().Where("id = ?", id).Find(&model)
+	database.GetDB().Delete(&model)
 
 	//result := database.GetDB().Model(&model.Mark{}).Preload("Product").
 	//	Where("id = ?", id).Find(&mark)
@@ -154,27 +158,27 @@ func DeleteModelHandler(c *gin.Context) {
 }
 
 // @Summary      UpdateModel
-// @Description  Обновление данных марки
-// @Param		 id path int true	"id марки"
+// @Description  Обновление данных модели
+// @Param		 id path int true	"id модели"
 // @Param        input body saveDTO.ModelDTO  true  "Новые значения"
 // @Tags         Model
 // @Accept       json
 // @Produce      json
 // @Router       /model/{id}  [put]
 func UpdateModelHandler(c *gin.Context) {
-	var mark *model.Mark = &model.Mark{}
-	var upMark *model.Mark = &model.Mark{}
+	var oldModel *model.Model = &model.Model{}
+	var upModel *model.Model = &model.Model{}
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := c.ShouldBindJSON(&upMark); err != nil {
+	if err := c.ShouldBindJSON(&upModel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", id).First(&mark)
+	result := database.GetDB().Where("id = ?", id).First(&oldModel)
 
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -183,10 +187,10 @@ func UpdateModelHandler(c *gin.Context) {
 		})
 		return
 	} else {
-		mark = upMark
-		mark.ID = uint(id)
+		oldModel = upModel
+		oldModel.ID = uint(id)
 
-		result = database.GetDB().Save(&mark)
+		result = database.GetDB().Save(&oldModel)
 		c.JSON(200, gin.H{
 			"result": result,
 		})

@@ -35,19 +35,26 @@ func main() {
 	router.GET("/car/:id", handlers.GetCarHandler)
 	router.GET("/mark/:id", handlers.GetMarkHandler)
 	router.GET("/model/:id", handlers.GetModelHandler)
+	router.GET("/transmission/:id", handlers.GetTransmissionHandler)
 	router.GET("/all-mark/", handlers.GetAllMarkHandler)
+	router.GET("/all-model/", handlers.GetAllModelHandler)
+	router.GET("/all-transmission/", handlers.GetAllTransmissionHandler)
+	router.GET("/range-car/:offset/:limit", handlers.GetRangeCarHandler)
 
 	router.POST("/car/add/", handlers.CreateCarHandler)
 	router.POST("/mark/add/", handlers.CreateMarkHandler)
 	router.POST("/model/add/", handlers.CreateModelHandler)
+	router.POST("/transmission/add/", handlers.CreateTransmissionHandler)
 
 	router.DELETE("/car/:id", handlers.DeleteCarHandler)
 	router.DELETE("/mark/:id", handlers.DeleteMarkHandler)
 	router.DELETE("/model/:id", handlers.DeleteModelHandler)
+	router.DELETE("/transmission/:id", handlers.DeleteTransmissionHandler)
 
 	router.PUT("/car/:id", handlers.UpdateCarHandler)
 	router.PUT("/mark/:id", handlers.UpdateMarkHandler)
 	router.PUT("/model/:id", handlers.UpdateModelHandler)
+	router.PUT("/transmission/:id", handlers.UpdateTransmissionHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		// In gin this is how you return a JSON response

@@ -12,7 +12,7 @@ import (
 var dbase *gorm.DB
 
 func Init() *gorm.DB {
-	connectionString := "user=postgres password=1234 dbname=test sslmode=disable"
+	connectionString := "user=postgres password=123 dbname=test sslmode=disable"
 	var db, err = gorm.Open(postgres.Open(connectionString))
 	if err != nil {
 		log.Fatal(err)

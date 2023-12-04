@@ -3,11 +3,14 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/swaggo/files"       // swagger embed files
+	_ "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	_ "gorm.io/gorm"
 	"log"
 	"main/database"
+	_ "main/docs"
 	"main/mappers"
 	"main/model"
-	"main/model/saveDTO"
 	"net/http"
 	"strconv"
 )
@@ -20,7 +23,6 @@ import (
 // @Produce      json
 // @Success      200  {object}   views.CarView
 // @Router       /car/{id} [get]
-
 func GetCarHandler(c *gin.Context) {
 
 	id, err := strconv.ParseUint(c.Params.ByName("id"), 10, 32)
@@ -59,6 +61,45 @@ func GetCarById(id uint) *model.Car {
 	return Car
 }
 
+// @Summary      GetCarRange
+// @Description  Получение списка машин
+// @Param        offset path int true	"начало списка"
+// @Param		 limit path int true	"конец списка"
+// @Tags         Car
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}   views.CarView
+// @Router       /range-car/{offset}/{limit} [get]
+func GetRangeCarHandler(c *gin.Context) {
+	var cars []*model.Car
+
+	offset, err := strconv.ParseUint(c.Params.ByName("offset"), 10, 32)
+	if err != nil {
+		log.Println(err.Error())
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	limit, err := strconv.ParseUint(c.Params.ByName("limit"), 10, 32)
+	if err != nil {
+		log.Println(err.Error())
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	result := database.GetDB().Offset(int(offset)).Limit(int(limit)).Find(&cars)
+
+	if result.Error != nil {
+		log.Println(result.Error)
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Not found",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"result": mappers.MapToCarViews(cars),
+	})
+}
+
 // @Summary      CreateCar
 // @Description  Добавление автомобиля в базу
 // @Param        input body saveDTO.CarDTO  true  "создание автомобиля"
@@ -68,8 +109,8 @@ func GetCarById(id uint) *model.Car {
 // @Router       /car/add/ [post]
 func CreateCarHandler(c *gin.Context) {
 	var Car *model.Car
-	var createdCar *saveDTO.CarDTO
-	if err := c.ShouldBindJSON(&createdCar); err != nil {
+
+	if err := c.ShouldBindJSON(&Car); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -133,9 +174,9 @@ func DeleteCarHandler(c *gin.Context) {
 // @Produce      json
 // @Router       /car/{id}  [put]
 func UpdateCarHandler(c *gin.Context) {
-	var car *model.Car = &model.Car{}
+	var oldCar *model.Car = &model.Car{}
 	var upCar *model.Car = &model.Car{}
-	value, err := strconv.Atoi(c.Params.ByName("id"))
+	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -145,20 +186,17 @@ func UpdateCarHandler(c *gin.Context) {
 		return
 	}
 
-	result := database.GetDB().Where("id = ?", value).First(&car)
+	result := database.GetDB().Where("id = ?", id).First(&oldCar)
 
 	if result.Error != nil {
 		c.JSON(404, gin.H{
 			"result": result,
 		})
 	} else {
-		if upCar.Description != "" {
-			car.Description = upCar.Description
-		}
-		if upCar.Description != "" {
-			car.Description = upCar.Description
-		}
-		database.GetDB().Save(&car)
+		oldCar = upCar
+		oldCar.ID = uint(id)
+
+		database.GetDB().Save(&oldCar)
 		c.JSON(200, gin.H{
 			"resulst": result,
 		})
